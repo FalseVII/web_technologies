@@ -1,7 +1,9 @@
 package com.tus.personal_project.data;
 
+
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -21,15 +23,11 @@ public class Order {
     @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "time", nullable = false)
-    Date time = new Date();
 
 
 
     public Order() {
     }
-
-
 
     public Order(String username, Long productId, String status) {
         this.username = username;
@@ -67,5 +65,16 @@ public class Order {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", productId=" + productId +
+                ", status='" + status + '\'' +
+                '}';
     }
 }
