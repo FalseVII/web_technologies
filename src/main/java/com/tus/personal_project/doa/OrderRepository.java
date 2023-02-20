@@ -15,4 +15,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o WHERE o.status = ?1")
     Iterable<Order> findAllByStatus(String status);
+
+    @Query("SELECT o FROM Order o WHERE o.username = ?1")
+    Iterable<Order> findAllByUsername(String username);
 }

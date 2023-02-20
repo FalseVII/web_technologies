@@ -33,5 +33,10 @@ public class OrderController {
         return orderService.findByStatus(status);
     }
 
+    @GetMapping("/api/v1/order/find/{username}")
+    public Iterable<Order> findByUsername(@PathVariable("username") String status) {
+        return orderService.findByUsername(status);
+    }
+
 
 }

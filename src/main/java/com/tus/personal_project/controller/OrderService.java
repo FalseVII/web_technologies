@@ -24,5 +24,9 @@ public class OrderService {
         return orderRepository.findAllByStatus(status);
     }
 
+    public Iterable<Order> findByUsername(String username){
+        return orderRepository.findAllByUsername(username);
+    }
+
 
 }
