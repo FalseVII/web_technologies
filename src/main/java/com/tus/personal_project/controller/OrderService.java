@@ -5,9 +5,6 @@ import com.tus.personal_project.doa.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Iterator;
-import java.util.Optional;
-
 @Component
 public class OrderService {
 

@@ -23,6 +23,9 @@ public class OrderController {
 
     @PostMapping("/api/v1/order/create/")
     public ResponseEntity<?> createNewOrder(@RequestBody Order order) {
+        if (order.getUsername() == "" || order.getProductId() == null) {
+            return new ResponseEntity<>("Missing required fields", HttpStatus.BAD_REQUEST);
+        }
         orderService.createOrder(order.getUsername(), order.getProductId());
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
