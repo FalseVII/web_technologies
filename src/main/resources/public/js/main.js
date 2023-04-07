@@ -9,7 +9,6 @@ function ordersPaneluser() {
 let product;
 
 $(document).ready(function () {
-
     $(".block").click(function(){
         $(this).toggleClass('active');
         $(".price").removeClass('active');
