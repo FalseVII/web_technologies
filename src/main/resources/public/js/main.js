@@ -43,6 +43,88 @@ $(document).ready(function () {
         $('#wrapper').toggleClass('toggled');
     });
 
+    function renderList() {
+        const products = [
+            // Add your product objects here
+            // Example: { id: 1, name: 'Product 1', image: 'https://via.placeholder.com/150', price: '10.00' },
+        ];
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/api/v1/product/find/all", true);
+        xhr.send();
+        xhr.onloadend = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    console.log("XHR:" + xhr.responseText);
+                    var json = JSON.parse(xhr.responseText);
+                    for (var i = 0; i < json.length; i++) {
+                        products.push({
+                            id: json[i].id,
+                            name: json[i].name,
+                            image: json[i].image,
+                            price: json[i].price
+                        });
+                    }
+                    displayProducts();
+                    createPagination();
+                } else {
+                    console.log("error");
+                }
+            }
+        }
+
+
+
+        const itemsPerPage = 8;
+        let currentPage = 1;
+
+        function displayProducts() {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+
+            const displayProducts = products.slice(start, end);
+
+            let productHtml = '';
+            for (const product of displayProducts) {
+                productHtml += `
+      <div class="col-md-3">
+        <div class="card mb-4">
+          <img src="${product.image}" class="card-img-top" alt="${product.name}">
+          <div class="card-body">
+            <h5 class="card-title">${product.name}</h5>
+            <p class="card-text">$${product.price}</p>
+          </div>
+        </div>
+      </div>
+    `;
+            }
+
+            document.getElementById('productContainer').innerHTML = productHtml;
+        }
+
+        function createPagination() {
+            const pageCount = Math.ceil(products.length / itemsPerPage);
+
+            let paginationHtml = '';
+            for (let i = 1; i <= pageCount; i++) {
+                paginationHtml += `
+      <li class="page-item-order${i === currentPage ? ' active' : ''}">
+        <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+      </li>
+    `;
+            }
+
+            document.querySelector('.pagination').innerHTML = paginationHtml;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            displayProducts();
+            createPagination();
+        }
+
+    }
+
     var exampleModal = document.getElementById('exampleModal')
     exampleModal.addEventListener('show.bs.modal', function (event) {
         // Button that triggered the modal

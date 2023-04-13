@@ -11,8 +11,8 @@ public class OrderService {
     @Autowired
     OrderRepository orderRepository;
 
-    public Order createOrder(String username, Long productId){
-        Order order = new Order(username, productId, "pending");
+    public Order createOrder(String username, String case_name, String gpu_name, String cpu_name, String cooling_name){
+        Order order = new Order(username, case_name, gpu_name, cpu_name, cooling_name);
         orderRepository.save(order);
         return order;
     }

@@ -23,10 +23,10 @@ public class OrderController {
 
     @PostMapping("/api/v1/order/create/")
     public ResponseEntity<?> createNewOrder(@RequestBody Order order) {
-        if (order.getUsername() == "" || order.getProductId() == null) {
+        if (order.getUsername() == "" || order.getCooling_name()== "" || order.getCpu_name()== "" || order.getCase_name()== "" || order.getGpu_name()== "") {
             return new ResponseEntity<>("Missing required fields", HttpStatus.BAD_REQUEST);
         }
-        orderService.createOrder(order.getUsername(), order.getProductId());
+        orderService.createOrder(order.getUsername(), order.getCase_name(), order.getGpu_name(), order.getCpu_name(), order.getCooling_name());
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
