@@ -22,4 +22,13 @@ public class ProductService {
     public Object findById(Long id) {
         return productRepository.findById(id);
     }
+
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
+
+    public void createProduct(Long id, String name, String description, Double price, String image) {
+        Product product = new Product(id, name, description, price, image);
+        productRepository.save(product);
+    }
 }

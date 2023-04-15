@@ -240,7 +240,7 @@ function loadAdminMainContent() {
         '          <a class="nav-link" href="#">Admin Panel</a>\n' +
         '        </li>\n' +
         '        <li class="nav-item">\n' +
-        '          <a class="nav-link" href="#">Products</a>\n' +
+        '          <a class="nav-link" onclick="loadProductsPage()" href="#">Products</a>\n' +
         '        </li>\n' +
         '        <li class="nav-item">\n' +
         '          <a class="nav-link" href="#" onclick="loadUploadContent()">Uploads</a>\n' +
@@ -477,8 +477,167 @@ function gatherOrderData() {
     }
 }
 
+function loadProductsPage() {
+    document.getElementById("page-content-wrapper").innerHTML = '<div class="container-fluid">\n' +
+        '        <div class="row">\n' +
+        '            <div class="col-lg-6">\n' +
+        '                <h3>Add Product</h3>\n' +
+        '                <form>\n' +
+        '                    <div class="mb-3">\n' +
+        '<div id="alert"></div>' +
+        '                        <label for="id" class="form-label">ID</label>\n' +
+        '                        <input type="number" class="form-control" id="id" placeholder="Enter product ID">\n' +
+        '                    </div>\n' +
+        '                    <div class="mb-3">\n' +
+        '                        <label for="name" class="form-label">Name</label>\n' +
+        '                        <input type="text" class="form-control" id="name" placeholder="Enter product name">\n' +
+        '                    </div>\n' +
+        '                    <div class="mb-3">\n' +
+        '                        <label for="description" class="form-label">Description</label>\n' +
+        '                        <textarea class="form-control" id="description" rows="3" placeholder="Enter product description"></textarea>\n' +
+        '                    </div>\n' +
+        '                    <div class="mb-3">\n' +
+        '                        <label for="image" class="form-label">Image</label>\n' +
+        '                        <textarea class="form-control" id="image" rows="3" placeholder="Enter product image"></textarea>\n' +
+        '                    </div>\n' +
+        '                    <div class="mb-3">\n' +
+        '                        <label for="price" class="form-label">Price</label>\n' +
+        '                        <input type="number" step="0.01" class="form-control" id="price" placeholder="Enter product price">\n' +
+        '                    </div>\n' +
+        '                    <button type="submit" onclick="createProduct()" class="btn btn-primary">Add Product</button>\n' +
+        '                </form>\n' +
+        '            </div>\n' +
+        '            <div class="col-lg-6">\n' +
+        '                <h3>Current Products</h3>\n' +
+        '                <!-- Display the current products in the database here -->\n' +
+        '            </div>\n' +
+        '        </div>\n' +
+        '    </div>'
 
-function userOrdersPage(){
+    fetch('/api/v1/product/find/all')
+        .then(response => response.json())
+        .then(products => {
+            const productListContainer = document.querySelector('.col-lg-6:nth-child(2)');
+            productList = new ProductList(products, productListContainer);
+            productList.render();
+        });
+
+}
+let  productList;
+
+async function createProduct() {
+
+    const idInput = document.getElementById("id");
+    const nameInput = document.getElementById("name");
+    const descriptionInput = document.getElementById("description");
+    const priceInput = document.getElementById("price");
+    const productImage = document.getElementById("image");
+
+    const newProduct = {
+        image: productImage.value,
+        id: parseInt(idInput.value),
+        name: nameInput.value,
+        description: descriptionInput.value,
+        price: parseFloat(priceInput.value),
+    };
+
+    try {
+        const response = await fetch("/api/v1/product/create/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newProduct),
+        });
+
+        if (response.ok) {
+            console.log("Product created successfully");
+            // Clear input fields
+            idInput.value = "";
+            nameInput.value = "";
+            descriptionInput.value = "";
+            priceInput.value = "";
+            document.getElementById("alert").innerHTML = '<div class="alert alert-success" role="alert">Product created successfully.</div>';
+
+// Refresh the product list
+            fetch('/api/v1/product/find/all')
+                .then(response => response.json())
+                .then(products => {
+                    productList.products = products;
+                    productList.render();
+                }
+            );
+
+        } else {
+          document.getElementById("alert").innerHTML = '<div class="alert alert-danger" role="alert">Something went wrong, please try again.</div>';
+        }
+    } catch (error) {
+        document.getElementById("alert").innerHTML = '<div class="alert alert-danger" role="alert">Something went wrong, please try again.</div>';
+    }
+}
+class ProductList {
+    constructor(products, container) {
+        this.products = products;
+        this.container = container;
+    }
+
+    render() {
+        this.container.innerHTML = '';
+
+        this.products.forEach(product => {
+            const productDiv = document.createElement('div');
+            productDiv.className = 'mb-3 border p-3';
+
+            const productName = document.createElement('h4');
+            productName.textContent = product.name;
+            productDiv.appendChild(productName);
+
+            const productId = document.createElement('p');
+            productId.textContent = "Product ID: " + product.id;
+            productDiv.appendChild(productId);
+
+
+            const productDescription = document.createElement('p');
+            productDescription.textContent = product.description;
+            productDiv.appendChild(productDescription);
+
+            const productPrice = document.createElement('p');
+            productPrice.textContent = `Price: $${product.price.toFixed(2)}`;
+            productDiv.appendChild(productPrice);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'btn btn-danger';
+            deleteButton.textContent = 'Delete';
+            deleteButton.addEventListener('click', () => {
+                deleteProduct(product.id);
+            });
+            productDiv.appendChild(deleteButton);
+
+            this.container.appendChild(productDiv);
+        });
+    }
+}
+
+function deleteProduct(productId) {
+    fetch(`/api/v1/product/delete/${productId}`, {
+        method: 'DELETE'
+    }).then(response => {
+        document.getElementById('alert').innerHTML = '<div class="alert alert-success" role="alert">Product deleted successfully.</div>';
+        fetch('/api/v1/product/find/all')
+            .then(response => response.json())
+            .then(products => {
+                    productList.products = products;
+                    productList.render();
+                }
+            );
+    }
+    );
+}
+
+
+
+
+    function userOrdersPage(){
     document.getElementById("page-content-wrapper").innerHTML = ' <div class="container mt-4">\n' +
         '    <h1 class="mb-4">User Orders</h1>\n' +
         '    <ul class="nav nav-tabs mb-4">\n' +
