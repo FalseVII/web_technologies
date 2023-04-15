@@ -12,10 +12,11 @@ import java.util.Iterator;
 @RestController
 public class OrderController {
 
+    @Autowired
     private final OrderService orderService;
 
 
-    @Autowired
+
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
@@ -31,14 +32,34 @@ public class OrderController {
     }
 
 
-    @GetMapping("/api/v1/order/find/{status}")
+    @GetMapping("/api/v1/order/find/status/{status}")
     public Iterable<Order> findByStatus(@PathVariable("status") String status) {
         return orderService.findByStatus(status);
     }
 
-    @GetMapping("/api/v1/order/find/{username}")
-    public Iterable<Order> findByUsername(@PathVariable("username") String status) {
-        return orderService.findByUsername(status);
+    @GetMapping("/api/v1/order/find/username/{username}")
+    public Iterable<Order> findByUsername(@PathVariable("username") String username) {
+        return orderService.findByUsername(username);
+    }
+
+    @PutMapping("/api/v1/order/update/status/{id}/{status}")
+    public void updateStatus(@PathVariable("id") Long id, @PathVariable("status") String status) {
+        orderService.updateStatus(id, status);
+    }
+
+    @PutMapping("/api/v1/order/update/{id}")
+    public void updateOrder(@PathVariable("id") Long id, @RequestBody Order order) {
+        orderService.updateOrder(id, order);
+    }
+
+    @GetMapping("/api/v1/order/find/{id}")
+    public Order findById(@PathVariable("id") Long id) {
+        return orderService.findById(id);
+    }
+
+    @DeleteMapping("/api/v1/order/delete/{id}")
+    public void deleteOrder(@PathVariable("id") Long id) {
+        orderService.deleteOrder(id);
     }
 
 

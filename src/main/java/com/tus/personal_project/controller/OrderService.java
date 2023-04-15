@@ -25,5 +25,30 @@ public class OrderService {
         return orderRepository.findAllByUsername(username);
     }
 
+    public void updateStatus(Long id, String status){
+        Order order = orderRepository.findById(id).get();
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
+
+    public void updateOrder(Long id, Order order){
+        Order order1 = orderRepository.findById(id).get();
+        order1.setCase_name(order.getCase_name());
+        order1.setCpu_name(order.getCpu_name());
+        order1.setGpu_name(order.getGpu_name());
+        order1.setCooling_name(order.getCooling_name());
+        orderRepository.save(order1);
+    }
+
+    public Order findById(Long id){
+        return orderRepository.findById(id).get();
+    }
+
+    public void deleteOrder(Long id){
+        orderRepository.deleteById(id);
+    }
+
+
+
 
 }
