@@ -25,7 +25,7 @@ function renderList() {
                     <div class="card fixed-size-card">
                         <img src="images/${item.image}" class="card-img-top" alt="..." >
                         <div class="card-body">
-                            <h5 class="card-title">${item.name}</h5>X
+                            <h5 class="card-title">${item.name}</h5>
                             <p class="card-text"><strong>${item.price}</strong> -- ${item.description}</p>
                             <button type="button" onclick="openModal(${item.id})" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                              Select
@@ -234,7 +234,7 @@ function loadAdminMainContent() {
         '    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">\n' +
         '      <ul class="navbar-nav me-auto mb-2 mb-lg-0">\n' +
         '        <li class="nav-item">\n' +
-        '          <a class="nav-link active" aria-current="page" href="#">Home</a>\n' +
+        '          <a class="nav-link active" aria-current="page" onclick="loadAdminMainContent()" href="#">Home</a>\n' +
         '        </li>\n' +
         '        <li class="nav-item">\n' +
         '          <a class="nav-link" href="#">Admin Panel</a>\n' +
