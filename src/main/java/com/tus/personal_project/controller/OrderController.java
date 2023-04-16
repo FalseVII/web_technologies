@@ -62,5 +62,9 @@ public class OrderController {
         orderService.deleteOrder(id);
     }
 
+    @GetMapping("/api/v1/order/find/all")
+    public Iterable<Order> findAll() {
+        return orderService.findAll();
+    }
 
 }

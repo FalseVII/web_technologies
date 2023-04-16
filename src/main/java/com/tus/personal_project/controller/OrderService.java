@@ -48,6 +48,9 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
+    public Iterable<Order>  findAll(){
+       return  orderRepository.findAll();
+    }
 
 
 

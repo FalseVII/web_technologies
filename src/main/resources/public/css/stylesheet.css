@@ -29,4 +29,7 @@ body {
     overflow-x: hidden;
     background-color: #ffffff;
 }
+.order{
+    border: black 1px solid;
+}
 

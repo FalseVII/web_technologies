@@ -240,27 +240,15 @@ function loadAdminMainContent() {
         '          <a class="nav-link" href="#">Admin Panel</a>\n' +
         '        </li>\n' +
         '        <li class="nav-item">\n' +
+        '          <a class="nav-link" onclick="adminOrderView()" href="#">Orders Panel</a>\n' +
+        '        </li>\n' +
+        '        <li class="nav-item">\n' +
         '          <a class="nav-link" onclick="loadProductsPage()" href="#">Products</a>\n' +
         '        </li>\n' +
         '        <li class="nav-item">\n' +
         '          <a class="nav-link" href="#" onclick="loadUploadContent()">Uploads</a>\n' +
         '        </li>\n' +
         '      </ul>\n' +
-        '      <form class="d-flex input-group w-auto">\n' +
-        '        <input\n' +
-        '          type="search"\n' +
-        '          class="form-control"\n' +
-        '          placeholder="Search an item!"\n' +
-        '          aria-label="Search"\n' +
-        '        />\n' +
-        '        <button\n' +
-        '          class="btn btn-outline-primary"\n' +
-        '          type="button"\n' +
-        '          data-mdb-ripple-color="dark"\n' +
-        '        >\n' +
-        '          Search\n' +
-        '        </button>\n' +
-        '      </form>\n' +
         '    </div>\n' +
         '  </div>\n' +
         '</nav>'+
@@ -320,6 +308,123 @@ function loadAdminMainContent() {
     renderList()
 }
 
+function adminOrderView() {
+    document.getElementById("page-content-wrapper").innerHTML='<div class="container">\n' +
+        '        <h1 class="text-center my-4">Admin View - Orders in progress.</h1>\n' +
+        '        <div class="row">\n' +
+        '            <div class="col-md-4 col-lg-2 mb-4">\n' +
+        '                <h4>Pending</h4>\n' +
+        '                <ul class="list-group" id="pending-orders">\n' +
+        '                    <!-- Pending orders go here -->\n' +
+        '                </ul>\n' +
+        '            </div>\n' +
+        '            <div class="col-md-4 col-lg-2 mb-4">\n' +
+        '                <h4>Paid</h4>\n' +
+        '                <ul class="list-group" id="paid-orders">\n' +
+        '                    <!-- Paid orders go here -->\n' +
+        '                </ul>\n' +
+        '            </div>\n' +
+        '            <div class="col-md-4 col-lg-2 mb-4">\n' +
+        '                <h4>Processing</h4>\n' +
+        '                <ul class="list-group" id="processing-orders">\n' +
+        '                    <!-- Processing orders go here -->\n' +
+        '                </ul>\n' +
+        '            </div>\n' +
+        '            <div class="col-md-4 col-lg-2 mb-4">\n' +
+        '                <h4>Ready</h4>\n' +
+        '                <ul class="list-group" id="ready-orders">\n' +
+        '                    <!-- Ready orders go here -->\n' +
+        '                </ul>\n' +
+        '            </div>\n' +
+        '            <div class="col-md-4 col-lg-2 mb-4">\n' +
+        '                <h4>Collected</h4>\n' +
+        '                <ul class="list-group" id="collected-orders">\n' +
+        '                    <!-- Collected orders go here -->\n' +
+        '                </ul>\n' +
+        '            </div>\n' +
+        '        </div>\n' +
+        '    </div>'
+fetchAndDisplayOrders()
+}
+
+async function fetchAndDisplayOrders() {
+    try {
+        const response = await fetch('/api/v1/order/find/all');
+        const orders = await response.json();
+
+        orders.forEach(order => {
+            insertOrder(order);
+            });
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+    }
+}
+
+function processOrder(id) {
+    fetch(`/api/v1/order/update/status/${id}/processing`, {
+        method: 'PUT'
+    }).then(() => {
+        clearOrders();
+        fetchAndDisplayOrders();
+    });
+}
+
+function insertOrder(order) {
+    const orderElement = document.createElement('div');
+    orderElement.classList.add('order');
+    orderElement.innerHTML = `
+    ID: ${order.id}<br>
+    Username: ${order.username}<br>
+    Case: ${order.case_name}<br>
+    GPU: ${order.gpu_name}<br>
+    CPU: ${order.cpu_name}<br>
+    Cooling: ${order.cooling_name}<br>
+  `;
+
+    if (order.status === 'Paid') {
+        orderElement.innerHTML += `<button class="btn btn-primary" onclick="processOrder(${order.id})">Process Order</button><br>`;
+    } else if (order.status === 'ready') {
+        orderElement.innerHTML += `<button class="btn btn-warning" onclick="markAsCollected(${order.id})">Mark as Collected</button><br>`;
+    } else if (order.status === 'processing') {
+        orderElement.innerHTML += `<button class="btn btn-danger" onclick="markAsCompleted(${order.id})">Mark as Completed</button><br>`;
+    }
+
+    document.getElementById(`${order.status.toLowerCase()}-orders`).appendChild(orderElement);
+}
+
+function clearOrders() {
+    const categories = ['pending', 'paid', 'processing', 'ready', 'collected'];
+
+    categories.forEach(category => {
+        const categoryElement = document.getElementById(`${category}-orders`);
+        if (categoryElement) {
+            categoryElement.innerHTML = '';
+        }
+    });
+}
+
+function markAsCompleted(id) {
+    fetch(`/api/v1/order/update/status/${id}/ready`, {
+        method: 'PUT'
+    }).then(() => {
+        clearOrders();
+        fetchAndDisplayOrders();
+    }
+    );
+
+}
+
+function markAsCollected(id) {
+    fetch(`/api/v1/order/update/status/${id}/collected`, {
+        method: 'PUT'
+    }).then(() => {
+        clearOrders();
+        fetchAndDisplayOrders();
+    }
+    );
+
+}
+
 function loadUserMainContent() {
     document.getElementsByClassName("main-body")[0].innerHTML='' +
         '<nav class="navbar navbar-expand-lg navbar-light bg-light">\n' +
@@ -345,21 +450,6 @@ function loadUserMainContent() {
         '          <a class="nav-link" onclick="userOrdersPage()" href="#">Orders</a>\n' +
         '        </li>\n' +
         '      </ul>\n' +
-        '      <form class="d-flex input-group w-auto">\n' +
-        '        <input\n' +
-        '          type="search"\n' +
-        '          class="form-control"\n' +
-        '          placeholder="Search an item!"\n' +
-        '          aria-label="Search"\n' +
-        '        />\n' +
-        '        <button\n' +
-        '          class="btn btn-outline-primary"\n' +
-        '          type="button"\n' +
-        '          data-mdb-ripple-color="dark"\n' +
-        '        >\n' +
-        '          Search\n' +
-        '        </button>\n' +
-        '      </form>\n' +
         '    </div>\n' +
         '  </div>\n' +
         '</nav>'+
@@ -427,16 +517,37 @@ function closeModal() {
 
 function loadUploadContent() {
     document.getElementById("page-content-wrapper").innerHTML = '<header class="w3-row w3-center">\n' +
-        '            <h1>File Upload with Spring</h1>\n' +
-        '            <h3>Online Reference <a href="https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/file-upload-Spring-Boot-Ajax-example#:~:text=Spring%20Boot%20file%20uploader&text=Create%20a%20Spring%20%40Controller%20class,Spring%20file%20upload%20was%20successful." target="_blank">[Click Here]</a></h3>\n' +
+        '            <h1>Upload an image to server.</h1>\n' +
         '        </header>\n' +
         '        <!-- HTML5 Input Form Elements -->\n' +
         '        <div class="w3-container w3-center">\n' +
         '            <input id="fileupload" type="file" name="fileupload" class="w3-input"  />\n' +
         '            <button class="w3-button w3-orange" id="btnUpload" onclick="uploadFile()"> Upload </button>\n' +
         '        </div>\n' +
-        '        <div class="w3-row w3-margin w3-center w3-green" id="theResponse"><h2>Responce will appear here</h2></div>'
+        '        <div id="alert"></div>'
 }
+
+async function uploadFile() {
+    let formData = new FormData();
+    formData.append("file", fileupload.files[0]);
+    let response = await fetch('/upload', {
+        method: "POST",
+        body: formData
+    });
+
+    if (response.status == 200) {
+        document.getElementById("alert").innerHTML = '<div class="alert alert-success" role="alert">File uploaded successfully.</div>';
+    }
+    else {
+        document.getElementById("alert").innerHTML = '<div class="alert alert-danger" role="alert">File upload failed.</div>';
+    }
+}
+
+$(document).ready(function() {
+    $('#theResponse').hide();
+    $(document).on("click", "#bthUpload", function(){ uploadFile(); });
+});
+
 
 function gatherOrderData() {
     const gpu = document.getElementById('gpu').value;
@@ -651,7 +762,7 @@ function deleteProduct(productId) {
         '        <a class="nav-link" id="processing-tab" data-bs-toggle="tab" href="#processing">Processing</a>\n' +
         '      </li>\n' +
         '      <li class="nav-item">\n' +
-        '        <a class="nav-link" id="ready-for-collection-tab" data-bs-toggle="tab" href="#ready-for-collection">Ready for Collection</a>\n' +
+        '        <a class="nav-link" id="ready-for-collection-tab" data-bs-toggle="tab" href="#ready">Ready for Collection</a>\n' +
         '      </li>\n' +
         '    </ul>\n' +
         '    <div class="tab-content">\n' +
@@ -739,7 +850,7 @@ function loadOrders() {
 }
 function removeAllOrders() {
     document.getElementById("pending").innerHTML = "";
-    document.getElementById("paid").innerHTML = "";
+    document.getElementById("Paid").innerHTML = "";
     document.getElementById("processing").innerHTML = "";
     document.getElementById("ready-for-collection").innerHTML = "";
 }
@@ -762,6 +873,10 @@ async function openUpdateModal(id) {
 
 function displayOrders(orders) {
     orders.forEach(function(order) {
+        if(order.status == "collected"){
+          return;
+        }
+
         var orderStatus = order.status;
         var payButton = orderStatus === 'pending' ? `<button type="button" class="btn btn-primary me-2" onclick="payForOrder(${order.id})">Pay</button>` : '';
         var updateButton = orderStatus === 'pending' ? `<button type="button" class="btn btn-warning" onclick="openUpdateModal(${order.id})" data-bs-toggle="modal" data-bs-target="#updateOrderModal">Update</button>` : '';
@@ -777,6 +892,7 @@ function displayOrders(orders) {
                             ${updateButton}
                           </div>
                         </div>`;
+        console.log(orderStatus)
         document.getElementById(orderStatus).innerHTML += orderContent;
     });
 }
@@ -825,7 +941,6 @@ function payForOrder(orderId) {
     xhr.send();
     xhr.onload = function () {
         if (xhr.status === 200) {
-            var order = JSON.parse(xhr.responseText);
             loadOrders();
         } else {
             console.log('Something went wrong, please try again.');
